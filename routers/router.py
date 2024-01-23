@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from database.models import Users
 from database.engine import collection_name
-from schemas import list_serial
+from schemas import list_serial, individual_serial
 from bson import ObjectId
 
 router = APIRouter()
@@ -11,6 +11,14 @@ router = APIRouter()
 async def get_users():
     users = await list_serial(collection_name.find())
     return users
+
+@router.get("/{id}")
+async def get_user_by_id(id: str):
+    user = await collection_name.find_one({"_id": ObjectId(id)})
+    if user:
+        return individual_serial(user)
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 """POST Request Method"""
